@@ -17,7 +17,8 @@
     ],
     "activationEvents": [
         "onCommand:elltg-npm-script-run.runNpmScriptCurrentTerminal",
-        "onCommand:elltg-npm-script-run.runNpmScriptNewTerminal"
+        "onCommand:elltg-npm-script-run.runNpmScriptNewTerminal",
+        "onStartupFinished"
     ],
     "main": "./dist/extension.js",
     "contributes": {

@@ -14,14 +14,10 @@
   "conventionalCommits.scopes": [
     ".gitignore",
     "pagekage.json",
-    "pages",
-    "views",
     "utils",
-    "styles",
-    "components",
     "store",
     ".vscode",
     "README.md",
-    "images"
+    "stores"
   ]
 }

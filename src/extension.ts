@@ -1,27 +1,37 @@
 import * as vscode from 'vscode';
-import { readNpmScripts } from './read-npm-scripts';
+import {
+    getQuickPickItemList,
+    initPackageJsonScriptsList,
+    setQuickPickItemToFirst,
+    watchPackageJsonChanges,
+} from './stores/npm-scripts-store';
 
 function openScriptInTerminal(
     terminal: vscode.Terminal | undefined,
-    selectedNpmScript: string
+    selectedNpmScript: NpmScriptQuickPickItem
 ): void {
     if (terminal) {
         terminal.show();
-        terminal.sendText(`npm run ${selectedNpmScript}`);
+        const workPath = selectedNpmScript.packageJsonPath.replace('package.json', '');
+        terminal.sendText(`cd ${workPath}`);
+        const npmCommand = `npm run ${selectedNpmScript.label}`;
+        terminal.sendText(npmCommand);
     } else {
         vscode.window.showInformationMessage('No active terminal. Exiting...');
     }
 }
 
 async function readNpmScriptsMain(openNewTerminal: boolean): Promise<void> {
-    const namedNpmScripts = await readNpmScripts();
+    // TODO show "Loading..." before getting the quickPickItemList
+    const quickPickItemList = await getQuickPickItemList();
 
-    const selectedNpmScript = await vscode.window.showQuickPick(namedNpmScripts);
+    const selectedNpmScript = await vscode.window.showQuickPick(quickPickItemList);
 
     if (!selectedNpmScript) {
         vscode.window.showInformationMessage('You did not select an npm script. Exiting...');
         return;
     }
+    setQuickPickItemToFirst(selectedNpmScript);
 
     let terminal: vscode.Terminal | undefined;
     if (openNewTerminal) {
@@ -33,7 +43,10 @@ async function readNpmScriptsMain(openNewTerminal: boolean): Promise<void> {
     openScriptInTerminal(terminal, selectedNpmScript);
 }
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+    initPackageJsonScriptsList();
+    watchPackageJsonChanges();
+
     let runNpmScriptCurrentTerminal = vscode.commands.registerCommand(
         'elltg-npm-script-run.runNpmScriptCurrentTerminal',
         async () => {
