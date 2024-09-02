@@ -1,13 +1,13 @@
 {
-    "name": "elltg-npm-script-run",
+    "name": "rjz-npm-script-run",
     "displayName": "Command Palette NPM Script Runner",
-    "description": "Run NPM scripts from the command palette",
+    "description": "Run All NPM scripts from the command palette",
     "icon": "images/logo-npm-run_128.png",
-    "publisher": "elltg",
-    "version": "1.0.8",
+    "publisher": "Ruan Jiazhen",
+    "version": "0.1.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/elliotjharper/vscode-npm-script-run.git"
+        "url": "https://github.com/RJiazhen/vscode-npm-script-run.git"
     },
     "engines": {
         "vscode": "^1.71.0"
