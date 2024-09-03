@@ -10,25 +10,25 @@
         "url": "https://github.com/RJiazhen/vscode-npm-script-run.git"
     },
     "engines": {
-        "vscode": "^1.92.0"
+        "vscode": "^1.71.0"
     },
     "categories": [
         "Other"
     ],
     "activationEvents": [
-        "onCommand:elltg-npm-script-run.runNpmScriptCurrentTerminal",
-        "onCommand:elltg-npm-script-run.runNpmScriptNewTerminal",
+        "onCommand:rjz-npm-run.runNpmScriptCurrentTerminal",
+        "onCommand:rjz-npm-run.runNpmScriptNewTerminal",
         "onStartupFinished"
     ],
     "main": "./dist/extension.js",
     "contributes": {
         "commands": [
             {
-                "command": "elltg-npm-script-run.runNpmScriptCurrentTerminal",
+                "command": "rjz-npm-run.runNpmScriptCurrentTerminal",
                 "title": "Run NPM Script From /package.json (Last Used Terminal)"
             },
             {
-                "command": "elltg-npm-script-run.runNpmScriptNewTerminal",
+                "command": "rjz-npm-run.runNpmScriptNewTerminal",
                 "title": "Run NPM Script From /package.json (New Terminal)"
             }
         ]
@@ -49,7 +49,7 @@
         "@types/glob": "^8.1.0",
         "@types/mocha": "^10.0.7",
         "@types/node": "20.x",
-        "@types/vscode": "^1.92.0",
+        "@types/vscode": "^1.71.0",
         "@typescript-eslint/eslint-plugin": "^7.14.1",
         "@typescript-eslint/parser": "^7.11.0",
         "@vscode/test-cli": "^0.0.9",
