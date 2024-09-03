@@ -4,7 +4,7 @@
     "description": "Run All NPM scripts from the command palette",
     "icon": "images/logo-npm-run_128.png",
     "publisher": "RuanJiazhen",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/RJiazhen/vscode-npm-script-run.git"
