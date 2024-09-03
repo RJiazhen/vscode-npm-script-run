@@ -5,6 +5,7 @@ import {
     setQuickPickItemToFirst,
     watchPackageJsonChanges,
 } from './stores/npm-scripts-store';
+import { checkIsNvmrcExit } from './utils/checkIsNvmrcExit';
 
 function openScriptInTerminal(
     terminal: vscode.Terminal | undefined,
@@ -14,6 +15,14 @@ function openScriptInTerminal(
         terminal.show();
         const workPath = selectedNpmScript.packageJsonPath.replace('package.json', '');
         terminal.sendText(`cd ${workPath}`);
+
+        const isNvmrcExit = checkIsNvmrcExit(
+            selectedNpmScript.packageJsonPath.replace('package.json', '')
+        );
+        if (isNvmrcExit) {
+            terminal.sendText(`nvm use`);
+        }
+
         const npmCommand = `npm run ${selectedNpmScript.label}`;
         terminal.sendText(npmCommand);
     } else {
@@ -28,7 +37,6 @@ async function readNpmScriptsMain(openNewTerminal: boolean): Promise<void> {
     const selectedNpmScript = await vscode.window.showQuickPick(quickPickItemList);
 
     if (!selectedNpmScript) {
-        vscode.window.showInformationMessage('You did not select an npm script. Exiting...');
         return;
     }
     setQuickPickItemToFirst(selectedNpmScript);
@@ -48,7 +56,7 @@ export async function activate(context: vscode.ExtensionContext) {
     watchPackageJsonChanges();
 
     let runNpmScriptCurrentTerminal = vscode.commands.registerCommand(
-        'elltg-npm-script-run.runNpmScriptCurrentTerminal',
+        'rjz-npm-run.runNpmScriptCurrentTerminal',
         async () => {
             await readNpmScriptsMain(false);
         }
@@ -56,7 +64,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(runNpmScriptCurrentTerminal);
 
     let runNpmScriptNewTerminal = vscode.commands.registerCommand(
-        'elltg-npm-script-run.runNpmScriptNewTerminal',
+        'rjz-npm-run.runNpmScriptNewTerminal',
         async () => {
             await readNpmScriptsMain(true);
         }
