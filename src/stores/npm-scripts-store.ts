@@ -31,7 +31,7 @@ export function watchPackageJsonChanges() {
         new vscode.RelativePattern(workspaceRootUri || '', '**/package.json')
     );
 
-    packageJsonWatcher.onDidChange(initPackageJsonScriptsList);
+    packageJsonWatcher.onDidChange(checkAndUpdatePackageJsonScriptsList);
     packageJsonWatcher.onDidCreate(initPackageJsonScriptsList);
     packageJsonWatcher.onDidDelete(initPackageJsonScriptsList);
 
@@ -39,9 +39,30 @@ export function watchPackageJsonChanges() {
 }
 
 /**
+ * check and update package.json scripts list when package.json changes
+ * @param e the event of package.json changes
+ */
+export const checkAndUpdatePackageJsonScriptsList = debounce(async function (e: any) {
+    // XXX simplify the code
+    let resolveAllNpmScriptPromise = () => {};
+    allNpmScriptPromise = new Promise((resolve) => {
+        resolveAllNpmScriptPromise = resolve;
+    });
+
+    const path = e.fsPath;
+    const packageJsonScripts = packageJsonScriptsList.find((item) => item.packageJsonPath === path);
+
+    if (packageJsonScripts) {
+        packageJsonScripts.scriptList = await getNpmScriptFromPackageJson(path);
+        getQuickPickItemList(true);
+        resolveAllNpmScriptPromise();
+    }
+});
+
+/**
  * init package.json scripts list
  */
-export const initPackageJsonScriptsList = debounce(async function () {
+export const initPackageJsonScriptsList = debounce(async function (e: any) {
     let resolveAllNpmScriptPromise = () => {};
     allNpmScriptPromise = new Promise((resolve) => {
         resolveAllNpmScriptPromise = resolve;
