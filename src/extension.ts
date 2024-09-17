@@ -58,7 +58,8 @@ async function readNpmScriptsMain(openNewTerminal: boolean): Promise<void> {
 
 export async function activate(context: vscode.ExtensionContext) {
     initPackageJsonScriptsList();
-    watchPackageJsonChanges();
+
+    context.subscriptions.push(watchPackageJsonChanges());
 
     let runNpmScriptCurrentTerminal = vscode.commands.registerCommand(
         'rjz-npm-run.runNpmScriptCurrentTerminal',

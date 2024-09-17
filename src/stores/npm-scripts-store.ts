@@ -34,6 +34,8 @@ export function watchPackageJsonChanges() {
     packageJsonWatcher.onDidChange(initPackageJsonScriptsList);
     packageJsonWatcher.onDidCreate(initPackageJsonScriptsList);
     packageJsonWatcher.onDidDelete(initPackageJsonScriptsList);
+
+    return packageJsonWatcher;
 }
 
 /**
