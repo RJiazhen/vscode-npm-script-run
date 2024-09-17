@@ -7,10 +7,10 @@ import {
 } from './stores/npm-scripts-store';
 import { checkIsNvmrcExit } from './utils/checkIsNvmrcExit';
 
-function openScriptInTerminal(
+async function openScriptInTerminal(
     terminal: vscode.Terminal | undefined,
     selectedNpmScript: NpmScriptQuickPickItem
-): void {
+) {
     if (terminal) {
         terminal.show();
         const workPath = selectedNpmScript.packageJsonPath.replace('package.json', '');
@@ -20,7 +20,12 @@ function openScriptInTerminal(
             selectedNpmScript.packageJsonPath.replace('package.json', '')
         );
         if (isNvmrcExit) {
-            terminal.sendText(`nvm use`);
+            const nvmrcPath = selectedNpmScript.packageJsonPath.replace('package.json', '.nvmrc');
+            const nvmrcVersion = (await vscode.workspace.openTextDocument(nvmrcPath))
+                .getText()
+                .trim()
+                .replace('v', '');
+            terminal.sendText(`nvm use ${nvmrcVersion}`);
         }
 
         const npmCommand = `npm run ${selectedNpmScript.label}`;
