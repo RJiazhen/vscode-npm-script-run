@@ -36,10 +36,27 @@ async function openScriptInTerminal(
 }
 
 async function readNpmScriptsMain(openNewTerminal: boolean): Promise<void> {
-    // TODO show "Loading..." before getting the quickPickItemList
-    const quickPickItemList = await getQuickPickItemList();
+    const quickPick = vscode.window.createQuickPick<
+        NpmScriptQuickPickItem | vscode.QuickPickItem
+    >();
+    quickPick.items = [
+        {
+            label: 'Loading npm scripts...',
+            description: 'Please wait...',
+        },
+    ];
+    quickPick.placeholder = 'Select an npm script to run';
+    quickPick.show();
 
-    const selectedNpmScript = await vscode.window.showQuickPick(quickPickItemList);
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    quickPick.items = await getQuickPickItemList();
+    quickPick.placeholder = 'Select an npm script to run';
+    const selectedNpmScript = await new Promise<NpmScriptQuickPickItem>((resolve) => {
+        quickPick.onDidChangeSelection((e) => {
+            resolve(e[0] as NpmScriptQuickPickItem);
+        });
+    });
 
     if (!selectedNpmScript) {
         return;
