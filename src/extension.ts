@@ -48,9 +48,11 @@ async function readNpmScriptsMain(openNewTerminal: boolean): Promise<void> {
     quickPick.placeholder = 'Select an npm script to run';
     quickPick.show();
 
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    // FIXME if immediately call after change package.json, quickPick.items will not be updated
 
-    quickPick.items = await getQuickPickItemList();
+    const quickPickItemList = await getQuickPickItemList();
+
+    quickPick.items = quickPickItemList;
     quickPick.placeholder = 'Select an npm script to run';
     const selectedNpmScript = await new Promise<NpmScriptQuickPickItem>((resolve) => {
         quickPick.onDidChangeSelection((e) => {
