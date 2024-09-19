@@ -1,0 +1,12 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"sub-1 package.json test script\" && exit 1",
+    "test2": "echo \"sub-1 package.json test2 script\""
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

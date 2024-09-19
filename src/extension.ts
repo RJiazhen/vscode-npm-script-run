@@ -7,10 +7,10 @@ import {
 } from './stores/npm-scripts-store';
 import { checkIsNvmrcExit } from './utils/checkIsNvmrcExit';
 
-function openScriptInTerminal(
+async function openScriptInTerminal(
     terminal: vscode.Terminal | undefined,
     selectedNpmScript: NpmScriptQuickPickItem
-): void {
+) {
     if (terminal) {
         terminal.show();
         const workPath = selectedNpmScript.packageJsonPath.replace('package.json', '');
@@ -20,7 +20,12 @@ function openScriptInTerminal(
             selectedNpmScript.packageJsonPath.replace('package.json', '')
         );
         if (isNvmrcExit) {
-            terminal.sendText(`nvm use`);
+            const nvmrcPath = selectedNpmScript.packageJsonPath.replace('package.json', '.nvmrc');
+            const nvmrcVersion = (await vscode.workspace.openTextDocument(nvmrcPath))
+                .getText()
+                .trim()
+                .replace('v', '');
+            terminal.sendText(`nvm use ${nvmrcVersion}`);
         }
 
         const npmCommand = `npm run ${selectedNpmScript.label}`;
@@ -31,10 +36,29 @@ function openScriptInTerminal(
 }
 
 async function readNpmScriptsMain(openNewTerminal: boolean): Promise<void> {
-    // TODO show "Loading..." before getting the quickPickItemList
+    const quickPick = vscode.window.createQuickPick<
+        NpmScriptQuickPickItem | vscode.QuickPickItem
+    >();
+    quickPick.items = [
+        {
+            label: 'Loading npm scripts...',
+            description: 'Please wait...',
+        },
+    ];
+    quickPick.placeholder = 'Select an npm script to run';
+    quickPick.show();
+
+    // FIXME if immediately call after change package.json, quickPick.items will not be updated
+
     const quickPickItemList = await getQuickPickItemList();
 
-    const selectedNpmScript = await vscode.window.showQuickPick(quickPickItemList);
+    quickPick.items = quickPickItemList;
+    quickPick.placeholder = 'Select an npm script to run';
+    const selectedNpmScript = await new Promise<NpmScriptQuickPickItem>((resolve) => {
+        quickPick.onDidChangeSelection((e) => {
+            resolve(e[0] as NpmScriptQuickPickItem);
+        });
+    });
 
     if (!selectedNpmScript) {
         return;
@@ -53,7 +77,8 @@ async function readNpmScriptsMain(openNewTerminal: boolean): Promise<void> {
 
 export async function activate(context: vscode.ExtensionContext) {
     initPackageJsonScriptsList();
-    watchPackageJsonChanges();
+
+    context.subscriptions.push(watchPackageJsonChanges());
 
     let runNpmScriptCurrentTerminal = vscode.commands.registerCommand(
         'rjz-npm-run.runNpmScriptCurrentTerminal',

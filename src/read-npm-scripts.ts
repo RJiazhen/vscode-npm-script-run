@@ -45,7 +45,7 @@ export async function getNpmScriptFromPackageJson(packageJsonPath: string): Prom
 
     const packageJsonScripts = (() => {
         try {
-            return JSON.parse(packageJsonTextContents).scripts;
+            return JSON.parse(packageJsonTextContents).scripts || {};
         } catch (e) {
             return {};
         }

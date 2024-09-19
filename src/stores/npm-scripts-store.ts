@@ -12,10 +12,14 @@ import {
 import * as vscode from 'vscode';
 import { debounce } from '../utils/debounce';
 
+let allNpmScriptPromiseResolve: () => void = () => {};
+
 /**
  * promise that indicates whether init package.json scripts list is done
  */
-let allNpmScriptPromise: Promise<void> | null = null;
+let allNpmScriptPromise: Promise<void> | null = new Promise((resolve) => {
+    allNpmScriptPromiseResolve = resolve;
+});
 
 /**
  * all package.json scripts list
@@ -31,19 +35,46 @@ export function watchPackageJsonChanges() {
         new vscode.RelativePattern(workspaceRootUri || '', '**/package.json')
     );
 
-    packageJsonWatcher.onDidChange(initPackageJsonScriptsList);
+    packageJsonWatcher.onDidChange(checkAndUpdatePackageJsonScriptsList);
     packageJsonWatcher.onDidCreate(initPackageJsonScriptsList);
     packageJsonWatcher.onDidDelete(initPackageJsonScriptsList);
+
+    return packageJsonWatcher;
 }
+
+/**
+ * check and update package.json scripts list when package.json changes
+ * @param e the event of package.json changes
+ */
+export const checkAndUpdatePackageJsonScriptsList = async function (e: any) {
+    // XXX simplify the code
+    allNpmScriptPromise =
+        allNpmScriptPromise ||
+        new Promise((resolve) => {
+            allNpmScriptPromiseResolve = resolve;
+        });
+
+    const path = e.fsPath;
+    const packageJsonScripts = packageJsonScriptsList.find((item) => item.packageJsonPath === path);
+
+    if (packageJsonScripts) {
+        packageJsonScripts.scriptList = await getNpmScriptFromPackageJson(path);
+        getQuickPickItemList(true);
+    }
+
+    allNpmScriptPromiseResolve();
+    allNpmScriptPromise = null;
+};
 
 /**
  * init package.json scripts list
  */
-export const initPackageJsonScriptsList = debounce(async function () {
-    let resolveAllNpmScriptPromise = () => {};
-    allNpmScriptPromise = new Promise((resolve) => {
-        resolveAllNpmScriptPromise = resolve;
-    });
+export const initPackageJsonScriptsList = debounce(async function (e: any) {
+    allNpmScriptPromise =
+        allNpmScriptPromise ||
+        new Promise((resolve) => {
+            allNpmScriptPromiseResolve = resolve;
+        });
 
     const packageJsonPathList = await getPackageJsonPathList();
 
@@ -57,7 +88,7 @@ export const initPackageJsonScriptsList = debounce(async function () {
         })
     );
 
-    resolveAllNpmScriptPromise();
+    allNpmScriptPromiseResolve();
     allNpmScriptPromise = null;
     getQuickPickItemList(true);
 });
